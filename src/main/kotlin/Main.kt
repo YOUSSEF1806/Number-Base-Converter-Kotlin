@@ -1,51 +1,46 @@
 package com.youyou
 
-import kotlin.math.*
+import java.math.BigInteger
 
 fun main() {
     var exitFlag = false
     do {
-        print("Do you want to convert /from decimal or /to decimal? (To quit type /exit) ")
+        print("\nEnter two numbers in format: {source base} {target base} (To quit type /exit) ")
         val input = readln()
         when (input) {
-            "/from" -> {
-                fromDecimal()
-            }
-
-            "/to" -> {
-                toDecimal()
-            }
-
             "/exit" -> {
                 exitFlag = true
+            }
+
+            else -> {
+                val (sourceBase, targetBase) = input.split(" ")
+                if (sourceBase.toInt() in (2..36) &&  targetBase.toInt() in (2..36)) {
+                    do {
+                        print("Enter number in base $sourceBase to convert to base $targetBase (To go back type /back) ")
+                        val numberToConvert = readln()
+                        if (numberToConvert != "/back") {
+                            val conversionResult =
+                                toBaseX(toDecimal(numberToConvert, sourceBase.toInt()), targetBase.toInt())
+                            println("Conversion result: $conversionResult\n")
+                        }
+                    } while (numberToConvert != "/back")
+                } else
+                    println("Source base and target base must be between 2 and 36 included !! \n")
             }
         }
     } while (!exitFlag)
 
 }
 
-fun fromDecimal() {
-    print("Enter a number in decimal system: ")
-    val number = readln().toInt()
-    print("Enter the target base: ")
-    val base = readln().toInt()
-    println("Conversion result: ${toBaseX(number, base)}")
-}
+fun toDecimal(sourceNumber: String, sourceBase: Int): BigInteger {
+    if (sourceBase == 10)
+        return sourceNumber.toBigInteger()
 
-fun toDecimal() {
-    print("Enter source number: ")
-    val sourceNumber = readln()
-    print("Enter source base: ")
-    val sourceBase = readln().toInt()
-    println("Conversion to decimal result: ${toDecimal(sourceNumber, sourceBase)}")
-}
-
-fun toDecimal(sourceNumber: String, sourceBase: Int): Int {
     return sourceNumber.reversed()
         .mapIndexed { index, c ->
-            c.toDecimalInt(sourceBase) * sourceBase.toDouble().pow(index).toInt()
+            c.toDecimalInt(sourceBase).toBigInteger().times(sourceBase.toBigInteger().pow(index))
         }
-        .sum()
+        .reduce { a, b -> a + b }
 }
 
 fun Char.toDecimalInt(sourceBase: Int): Int {
@@ -55,15 +50,18 @@ fun Char.toDecimalInt(sourceBase: Int): Int {
     return (this - '0')
 }
 
-fun toBaseX(number: Int, base: Int): String {
+fun toBaseX(number: BigInteger, base: Int): String {
+    if (base == 10)
+        return number.toString()
+    
     var quotient = number
     val listRemainders = mutableListOf<Char>()
     do {
-        val remainder = quotient % base
-        quotient /= base
-        listRemainders.add(remainder.toBaseChar(base))
-    } while (quotient >= base)
-    listRemainders.add(quotient.toBaseChar(base))
+        val remainder = quotient.remainder(base.toBigInteger())
+        quotient /= base.toBigInteger()
+        listRemainders.add(remainder.toInt().toBaseChar(base))
+    } while (quotient >= base.toBigInteger())
+    listRemainders.add(quotient.toInt().toBaseChar(base))
     return listRemainders
         .apply { if (this.last() == '0') listRemainders.removeLast() }
         .reversed()

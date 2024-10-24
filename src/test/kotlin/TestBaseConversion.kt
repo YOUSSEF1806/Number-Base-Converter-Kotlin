@@ -10,26 +10,26 @@ class TestBaseConversion {
 
     @Test
     fun testToDecimal() {
-        assertEquals(31, toDecimal("1f", 16))
-        assertEquals(255, toDecimal("ff", 16))
-        assertEquals(17, toDecimal("21", 8))
-        assertEquals(57, toDecimal("71", 8))
-        assertEquals(103, toDecimal("147", 8))
-        assertEquals(15, toDecimal("1111", 2))
-        assertEquals(57, toDecimal("111001", 2))
-        assertEquals(101, toDecimal("1100101", 2))
+        assertEquals(31.toBigInteger(), toDecimal("1f", 16))
+        assertEquals(255.toBigInteger(), toDecimal("ff", 16))
+        assertEquals(17.toBigInteger(), toDecimal("21", 8))
+        assertEquals(57.toBigInteger(), toDecimal("71", 8))
+        assertEquals(103.toBigInteger(), toDecimal("147", 8))
+        assertEquals(15.toBigInteger(), toDecimal("1111", 2))
+        assertEquals(57.toBigInteger(), toDecimal("111001", 2))
+        assertEquals(101.toBigInteger(), toDecimal("1100101", 2))
     }
 
     @Test
     fun testToBaseX() {
-        assertEquals("1f".uppercase(), toBaseX(31, 16))
-        assertEquals("ff".uppercase(), toBaseX(255, 16))
-        assertEquals("21", toBaseX(17, 8))
-        assertEquals("71", toBaseX(57, 8))
-        assertEquals("147", toBaseX(103, 8))
-        assertEquals("1111", toBaseX(15, 2))
-        assertEquals("111001", toBaseX(57, 2))
-        assertEquals("1100101", toBaseX(101, 2))
+        assertEquals("1f".uppercase(), toBaseX(31.toBigInteger(), 16))
+        assertEquals("ff".uppercase(), toBaseX(255.toBigInteger(), 16))
+        assertEquals("21", toBaseX(17.toBigInteger(), 8))
+        assertEquals("71", toBaseX(57.toBigInteger(), 8))
+        assertEquals("147", toBaseX(103.toBigInteger(), 8))
+        assertEquals("1111", toBaseX(15.toBigInteger(), 2))
+        assertEquals("111001", toBaseX(57.toBigInteger(), 2))
+        assertEquals("1100101", toBaseX(101.toBigInteger(), 2))
     }
 
     @Test
