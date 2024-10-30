@@ -1,6 +1,9 @@
 package com.youyou
 
+import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
+import java.util.*
 
 fun main() {
     var exitFlag = false
@@ -14,13 +17,13 @@ fun main() {
 
             else -> {
                 val (sourceBase, targetBase) = input.split(" ")
-                if (sourceBase.toInt() in (2..36) &&  targetBase.toInt() in (2..36)) {
+                if (sourceBase.toInt() in (2..36) && targetBase.toInt() in (2..36)) {
                     do {
                         print("Enter number in base $sourceBase to convert to base $targetBase (To go back type /back) ")
                         val numberToConvert = readln()
                         if (numberToConvert != "/back") {
                             val conversionResult =
-                                toBaseX(toDecimal(numberToConvert, sourceBase.toInt()), targetBase.toInt())
+                                controlFlowConversion(numberToConvert, sourceBase.toInt(), targetBase.toInt())
                             println("Conversion result: $conversionResult\n")
                         }
                     } while (numberToConvert != "/back")
@@ -30,6 +33,52 @@ fun main() {
         }
     } while (!exitFlag)
 
+}
+
+fun controlFlowConversion(number: String, sourceBase: Int, targetBase: Int): String {
+    var fractionalPart = ""
+    if (number.contains(".")) {
+        val fractionalToDecimal = fractionalToDecimal(
+            number.substringAfter("."),
+            sourceBase
+        )
+        fractionalPart = fractionalToBaseX(
+            fractionalToDecimal,
+            targetBase
+        )
+    }
+    return toBaseX(
+        toDecimal(number.substringBefore("."), sourceBase),
+        targetBase
+    ) + if (fractionalPart.isNotBlank()) "." + fractionalPart.substringAfter(".") else fractionalPart
+}
+
+fun fractionalToDecimal(sourceNumber: String, sourceBase: Int): BigDecimal {
+    if (sourceBase == 10)
+        return "0.$sourceNumber".toBigDecimal()
+
+    return sourceNumber
+        .mapIndexed { index, c ->
+            val powX = sourceBase.toBigDecimal().pow(index + 1)
+            val charToDecimal = c.toDecimalInt(sourceBase)
+            charToDecimal.toBigDecimal().divide(powX, 6, RoundingMode.HALF_EVEN)
+        }.reduce { a, b -> a + b }
+}
+
+fun fractionalToBaseX(number: BigDecimal, base: Int): String {
+    if (base == 10)
+        return String.format(Locale.US, "%.5f", number)
+
+    var quotient = number
+    var listRemainders = ""
+    do {
+        val remainder = quotient.times(base.toBigDecimal()).toInt()
+        quotient = quotient.times(base.toBigDecimal()) - remainder.toBigDecimal()
+        listRemainders += remainder.toBaseChar(base)
+    } while (quotient != 0.toBigDecimal() && listRemainders.length < 5)
+    if (listRemainders.length < 5)
+        listRemainders += List(5 - listRemainders.length) { '0' }.joinToString("")
+    return listRemainders
 }
 
 fun toDecimal(sourceNumber: String, sourceBase: Int): BigInteger {
@@ -53,19 +102,17 @@ fun Char.toDecimalInt(sourceBase: Int): Int {
 fun toBaseX(number: BigInteger, base: Int): String {
     if (base == 10)
         return number.toString()
-    
+
     var quotient = number
-    val listRemainders = mutableListOf<Char>()
+    var listRemainders = ""
     do {
         val remainder = quotient.remainder(base.toBigInteger())
         quotient /= base.toBigInteger()
-        listRemainders.add(remainder.toInt().toBaseChar(base))
+        listRemainders = remainder.toInt().toBaseChar(base) + listRemainders
     } while (quotient >= base.toBigInteger())
-    listRemainders.add(quotient.toInt().toBaseChar(base))
+    if (quotient.toInt() != 0)
+        listRemainders = quotient.toInt().toBaseChar(base) + listRemainders
     return listRemainders
-        .apply { if (this.last() == '0') listRemainders.removeLast() }
-        .reversed()
-        .joinToString("")
 }
 
 fun Int.toBaseChar(base: Int): Char {
